@@ -14,7 +14,7 @@ let welcomeMessage =
 const welcomeMenu = new TelegrafInlineMenu(
   ctx => `Benvenuto ${ctx.from.first_name}` + welcomeMessage
 )
-welcomeMenu.simpleButton("Controlla", "a", {
+welcomeMenu.simpleButton("Controlla 📊", "a", {
   doFunc: ctx => fetchLatest("Italy", ctx)
 })
 
@@ -77,7 +77,7 @@ function fetchLatest(country, ctx) {
           ctx.reply(
             returnMessage,
             Markup.inlineKeyboard([
-              Markup.urlButton("Covid-19 - Domande e Risposte", link, false)
+              Markup.urlButton("Covid-19 - Domande e Risposte 🌍", link, false)
             ]).extra()
           )
         }
