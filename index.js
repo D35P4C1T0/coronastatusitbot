@@ -30,7 +30,7 @@ bot.launch()
 
 function fetchLatest(country, ctx) {
   let sourceLink =
-    "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/who_covid_19_situation_reports/who_covid_19_sit_rep_time_series/who_covid_19_sit_rep_time_series.csv"
+    "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv"
 
   axios
     .get(sourceLink)
@@ -40,15 +40,35 @@ function fetchLatest(country, ctx) {
         complete: function(results) {
           console.log("CSV fetch done!")
 
+          // let lastCheck = new Date(
+          //   Date.parse(results.data[0][Object.size(results.data[0]) - 1])
+          // ).toLocaleString("it-IT", {
+          //   weekday: "long",
+          //   month: "2-digit",
+          //   day: "2-digit",
+          //   year: "2-digit"
+          // })
+
           let lastCheck = new Date(
-            Date.parse(results.data[0][Object.size(results.data[0]) - 1])
-          ).toLocaleString("it-IT", {
-            weekday: "long",
-            month: "2-digit",
-            day: "2-digit",
-            year: "2-digit"
+            results.data[0][Object.size(results.data[0]) - 1]
+          )
+
+          const dtf = new Intl.DateTimeFormat("en", {
+            year: "numeric",
+            month: "short",
+            day: "2-digit"
           })
-          console.log("Last check " + lastCheck)
+          const [
+            { value: mo },
+            ,
+            { value: da },
+            ,
+            { value: ye }
+          ] = dtf.formatToParts(lastCheck)
+
+          // console.log("Last check " + lastCheck)
+          console.log(`${da}-${mo}-${ye}`)
+          lastCheck = `${da}-${mo}-${ye}`
 
           let latestInfectedAmount
           results.data.forEach(element => {
