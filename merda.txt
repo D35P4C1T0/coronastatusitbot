@@ -1,0 +1,7 @@
+
+> coronastatusitbot@1.0.0 start /home/matteo/Documents/Repos/coronastatusitbot
+> node index.js
+
+
+  Server avviato all'indirizzo http://:::3000
+  

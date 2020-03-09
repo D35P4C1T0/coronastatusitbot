@@ -7,10 +7,10 @@ const Extra = require("telegraf/extra")
 const TelegrafInlineMenu = require("telegraf-inline-menu")
 const axios = require("axios")
 const Papa = require("papaparse")
+const { CanvasRenderService } = require("chartjs-node-canvas")
 const PORT = process.env.PORT || 3000
 
 const http = require("http")
-
 const server = http.createServer((req, res) => {
   res.writeHead(200, { "Content-Type": "text/plain" })
   res.end("Esempio server HTTP\n")
@@ -26,14 +26,24 @@ const callback = () => {
 
 server.listen(PORT, callback)
 
+////////////////////////////////////////////////////////////
+
 let welcomeMessage =
-  ", questo bot ti permette di controllare il numero di casi di contagio in Italia, ed è ancora in fase sperimentale.\n➡ Premi il tasto Controlla per controllare l'ultimo conteggio ufficiale"
+  ", questo bot ti permette di controllare il numero di casi di contagio in Italia, ed è ancora in fase sperimentale.\n"
+
+let dataSourceLink =
+  "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv"
+
+////////////////////////////////////////////////////////////
 
 const welcomeMenu = new TelegrafInlineMenu(
   ctx => `Benvenuto ${ctx.from.first_name}` + welcomeMessage
 )
-welcomeMenu.simpleButton("Controlla 📊", "a", {
+welcomeMenu.simpleButton("Controlla i contagi 🔍", "a", {
   doFunc: ctx => fetchLatest("Italy", ctx)
+})
+welcomeMenu.simpleButton("Ottieni un grafico 📊", "b", {
+  doFunc: ctx => getGrafico("Italy", ctx)
 })
 
 welcomeMenu.setCommand("start")
@@ -47,11 +57,8 @@ bot.help(ctx => ctx.reply("TODO"))
 bot.launch()
 
 function fetchLatest(country, ctx) {
-  let sourceLink =
-    "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv"
-
   axios
-    .get(sourceLink)
+    .get(dataSourceLink)
     .then(response => {
       // console.log(response.data)
       Papa.parse(response.data, {
@@ -118,6 +125,149 @@ function fetchLatest(country, ctx) {
               Markup.urlButton("Covid-19 - Domande e Risposte 🌍", link, false)
             ]).extra()
           )
+        }
+      })
+    })
+    .catch(error => {
+      console.log(error)
+    })
+}
+
+function getGrafico(country, ctx) {
+  axios
+    .get(dataSourceLink)
+    .then(response => {
+      // console.log(response.data)
+      Papa.parse(response.data, {
+        complete: function(results) {
+          console.log("CSV fetch done!")
+          let dailyChecks = []
+          let countryIndex = -1
+
+          for (let index = 0; index < results.data.length; index++) {
+            if (results.data[index].includes(country)) {
+              countryIndex = index
+            }
+          }
+
+          // index=4 since the array is like this:
+          // the dates start at the 4th place in the array
+
+          // data: [
+          //         [
+          //           'Province/State', 'Country/Region', 'Lat',
+          //           'Long',           '1/22/20',        '1/23/20',
+          //           '1/24/20',        '1/25/20',        '1/26/20'
+          //         ]
+          // ]
+
+          for (let index = 4; index < results.data[0].length; index++) {
+            // not relevant numbers are going to be ignored
+            if (results.data[countryIndex][index] > 0) {
+              let dailyCheckDate = new Date(results.data[0][index])
+              const dtf = new Intl.DateTimeFormat("en", {
+                year: "numeric",
+                month: "short",
+                day: "2-digit"
+              })
+              const [
+                { value: mo },
+                ,
+                { value: da },
+                ,
+                { value: ye }
+              ] = dtf.formatToParts(dailyCheckDate)
+              dailyCheckDate = `${da}-${mo}-${ye}`
+
+              let infectedCount = results.data[countryIndex][index]
+
+              dailyChecks.push({ date: dailyCheckDate, cases: infectedCount })
+            }
+          }
+
+          // console.log(dailyChecks)
+
+          const width = 1000
+          const height = 900
+          const chartCallback = ChartJS => {
+            // Global config example: https://www.chartjs.org/docs/latest/configuration/
+            ChartJS.defaults.global.elements.rectangle.borderWidth = 2
+            // Global plugin example: https://www.chartjs.org/docs/latest/developers/plugins.html
+            ChartJS.plugins.register({
+              // plugin implementation
+            })
+            // New chart type example: https://www.chartjs.org/docs/latest/developers/charts.html
+            ChartJS.controllers.MyType = ChartJS.DatasetController.extend({
+              // chart implementation
+            })
+          }
+          const canvasRenderService = new CanvasRenderService(
+            width,
+            height,
+            chartCallback
+          )
+
+          let days = []
+          let cases = []
+
+          Object.values(dailyChecks).forEach(element => {
+            // console.log(element)
+            days.push(element.date)
+            cases.push(element.cases)
+          })
+          ;(async () => {
+            const configuration = {
+              type: "line",
+              data: {
+                labels: days,
+                datasets: [
+                  {
+                    label: "# of Confirmed Cases in " + country,
+                    data: cases,
+                    // backgroundColor: [
+                    //   "rgba(255, 99, 132, 0.2)",
+                    //   "rgba(54, 162, 235, 0.2)",
+                    //   "rgba(255, 206, 86, 0.2)",
+                    //   "rgba(75, 192, 192, 0.2)",
+                    //   "rgba(153, 102, 255, 0.2)",
+                    //   "rgba(255, 159, 64, 0.2)"
+                    // ],
+                    // borderColor: [
+                    //   "rgba(255,99,132,1)",
+                    //   "rgba(54, 162, 235, 1)",
+                    //   "rgba(255, 206, 86, 1)",
+                    //   "rgba(75, 192, 192, 1)",
+                    //   "rgba(153, 102, 255, 1)",
+                    //   "rgba(255, 159, 64, 1)"
+                    // ],
+                    borderWidth: 1
+                  }
+                ]
+              },
+              options: {
+                scales: {
+                  yAxes: [
+                    {
+                      ticks: {
+                        beginAtZero: true,
+                        callback: value => value
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+            const image = await canvasRenderService.renderToBuffer(
+              configuration
+            )
+            // const dataUrl = await canvasRenderService.renderToDataURL(
+            //   configuration
+            // )
+            // const stream = canvasRenderService.renderToStream(configuration)
+
+            // console.log("data plotted " + dataUrl)
+            ctx.replyWithPhoto({ source: image })
+          })()
         }
       })
     })
