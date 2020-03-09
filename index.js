@@ -257,7 +257,7 @@ function getGrafico(country, ctx) {
                 }
               }
             }
-            const image = await canvasRenderService.renderToBuffer(
+            const graphImage = await canvasRenderService.renderToBuffer(
               configuration
             )
             // const dataUrl = await canvasRenderService.renderToDataURL(
@@ -266,7 +266,46 @@ function getGrafico(country, ctx) {
             // const stream = canvasRenderService.renderToStream(configuration)
 
             // console.log("data plotted " + dataUrl)
-            ctx.replyWithPhoto({ source: image })
+
+            // This piece of code down here uses the GROWTH function from Excell, right, that Excell,
+            // to simulate the growth of a certain function. It does work pretty well but
+            // I still dont feel like I should tell how the disease might evolve and spread, you know.
+            // Gonna leave it commented out.
+
+            /*
+            // starts here
+            let estimatedDays = 10
+            let dummmyX = [...Array(days.length + estimatedDays).keys()]
+            console.log(days.length)
+            console.log(dummmyX)
+
+            let estimatedGrowth = growth(cases, undefined, dummmyX)
+            let estimatedFutureValues = []
+            estimatedGrowth.forEach(element => {
+              if (element > cases[days.length - 1]) {
+                estimatedFutureValues.push(element)
+              }
+            })
+
+            for (let index = 0; index < estimatedFutureValues.length; index++) {
+              estimatedFutureValues[index] = Math.floor(
+                estimatedFutureValues[index]
+              )
+            }
+            console.log("estimated future growth: " + estimatedFutureValues)
+            // ends here. "estimatedFutureValues" is an array containing new possible values, greater than the latest real one.
+            */
+
+            ctx.replyWithMediaGroup([
+              {
+                media: { source: graphImage },
+                // caption:
+                //   "Possibile crescita del numero di contagiati nei prossimi 7 giorni: " +
+                //   estimatedFutureValues,
+                caption: days[days.length - 1],
+                type: "photo"
+              }
+            ])
           })()
         }
       })
@@ -274,6 +313,55 @@ function getGrafico(country, ctx) {
     .catch(error => {
       console.log(error)
     })
+}
+
+function growth(known_y, known_x, new_x, use_const) {
+  // default values for optional parameters:
+  if (typeof known_x == "undefined") {
+    known_x = []
+    for (var i = 1; i <= known_y.length; i++) known_x.push(i)
+  }
+  if (typeof new_x == "undefined") {
+    new_x = []
+    for (var i = 1; i <= known_y.length; i++) new_x.push(i)
+  }
+  if (typeof use_const == "undefined") use_const = true
+
+  // calculate sums over the data:
+  var n = known_y.length
+  var avg_x = 0
+  var avg_y = 0
+  var avg_xy = 0
+  var avg_xx = 0
+  for (var i = 0; i < n; i++) {
+    var x = known_x[i]
+    var y = Math.log(known_y[i])
+    avg_x += x
+    avg_y += y
+    avg_xy += x * y
+    avg_xx += x * x
+  }
+  avg_x /= n
+  avg_y /= n
+  avg_xy /= n
+  avg_xx /= n
+
+  // compute linear regression coefficients:
+  if (use_const) {
+    var beta = (avg_xy - avg_x * avg_y) / (avg_xx - avg_x * avg_x)
+    var alpha = avg_y - beta * avg_x
+  } else {
+    var beta = avg_xy / avg_xx
+    var alpha = 0
+  }
+  // console.log("alpha = " + alpha + ", beta = " +  beta);
+
+  // compute and return result array:
+  var new_y = []
+  for (var i = 0; i < new_x.length; i++) {
+    new_y.push(Math.exp(alpha + beta * new_x[i]))
+  }
+  return new_y
 }
 
 Object.size = function(obj) {
