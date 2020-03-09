@@ -1,3 +1,4 @@
+require("dotenv").config()
 const Telegraf = require("telegraf")
 const Markup = require("telegraf/markup")
 const Extra = require("telegraf/extra")
@@ -6,7 +7,24 @@ const Extra = require("telegraf/extra")
 const TelegrafInlineMenu = require("telegraf-inline-menu")
 const axios = require("axios")
 const Papa = require("papaparse")
-require("dotenv").config()
+const PORT = process.env.PORT || 3000
+
+const http = require("http")
+
+const server = http.createServer((req, res) => {
+  res.writeHead(200, { "Content-Type": "text/plain" })
+  res.end("Esempio server HTTP\n")
+})
+
+const callback = () => {
+  const address = server.address().address
+  const port = server.address().port
+  console.log(`
+  Server avviato all'indirizzo http://${address}:${port}
+  `)
+}
+
+server.listen(PORT, callback)
 
 let welcomeMessage =
   ", questo bot ti permette di controllare il numero di casi di contagio in Italia, ed è ancora in fase sperimentale.\n➡ Premi il tasto Controlla per controllare l'ultimo conteggio ufficiale"
