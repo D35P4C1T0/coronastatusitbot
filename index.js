@@ -12,6 +12,16 @@ const { CanvasRenderService } = require('chartjs-node-canvas')
 const PORT = process.env.PORT || 3000
 
 const http = require('http')
+const express = require('express')
+const app = express()
+app.get('/', (request, response) => {
+  console.log(Date.now() + ' Ping Received')
+  response.sendStatus(200)
+})
+app.listen(process.env.PORT)
+setInterval(() => {
+  http.get(`http://${process.env.PROJECT_DOMAIN}.glitch.me/`)
+}, 280000)
 const server = http.createServer((req, res) => {
   res.writeHead(200, { 'Content-Type': 'text/plain' })
   res.end('Esempio server HTTP\n')
