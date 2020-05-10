@@ -9,8 +9,7 @@ const axios = require('axios')
 // const Papa = require("papaparse")
 const { CanvasRenderService } = require('chartjs-node-canvas')
 
-const PORT = process.env.PORT || 3000
-
+// Things server related (hosting on glitch.io)
 const http = require('http')
 const express = require('express')
 const app = express()
@@ -22,20 +21,6 @@ app.listen(process.env.PORT)
 setInterval(() => {
   http.get(`http://${process.env.PROJECT_DOMAIN}.glitch.me/`)
 }, 280000)
-const server = http.createServer((req, res) => {
-  res.writeHead(200, { 'Content-Type': 'text/plain' })
-  res.end('Esempio server HTTP\n')
-})
-
-const callback = () => {
-  const address = server.address().address
-  const port = server.address().port
-  console.log(`
-  Server avviato all'indirizzo http://${address}:${port}
-  `)
-}
-
-server.listen(PORT, callback)
 
 ////////////////////////////////////////////////////////////
 
@@ -108,7 +93,7 @@ function getGrafico(cronologiaLink, ctx) {
       })
 
       // chart here
-      const width = 900 //px
+      const width = 1200 //px
       const height = 1000 //px
       const chartCallback = (ChartJS) => {
         ChartJS.defaults.global.elements.rectangle.borderWidth = 2
