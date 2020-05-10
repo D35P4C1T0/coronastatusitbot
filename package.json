@@ -21,15 +21,10 @@
   "dependencies": {
     "axios": "^0.19.2",
     "chart.js": "^2.9.3",
-    "chartjs": "^0.3.24",
     "chartjs-node-canvas": "^3.0.6",
-    "convert-csv-to-json": "0.0.15",
     "dotenv": "^8.2.0",
-    "google-charts": "^2.0.0",
     "papaparse": "^5.1.1",
     "telegraf": "^3.36.0",
-    "telegraf-inline-menu": "^4.0.0",
-    "xmlhttprequest": "^1.8.0",
-    "minimist": ">=1.2.2"
+    "telegraf-inline-menu": "^4.0.0"
   }
 }
