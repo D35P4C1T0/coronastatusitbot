@@ -5,7 +5,7 @@ function getGrafico(cronologiaLink, ctx) {
       // console.log(response.data)
       Papa.parse(response.data, {
         complete: function (results) {
-          console.log("CSV fetch done!")
+          console.log('CSV fetch done!')
           let dailyChecks = []
           let countryIndex = -1
 
@@ -30,10 +30,10 @@ function getGrafico(cronologiaLink, ctx) {
             // not relevant numbers are going to be ignored
             if (results.data[countryIndex][index] > 0) {
               let dailyCheckDate = new Date(results.data[0][index])
-              const dtf = new Intl.DateTimeFormat("en", {
-                year: "numeric",
-                month: "short",
-                day: "2-digit",
+              const dtf = new Intl.DateTimeFormat('en', {
+                year: 'numeric',
+                month: 'short',
+                day: '2-digit',
               })
               const [
                 { value: mo },
@@ -82,12 +82,12 @@ function getGrafico(cronologiaLink, ctx) {
           })
           ;(async () => {
             const configuration = {
-              type: "line",
+              type: 'line',
               data: {
                 labels: days,
                 datasets: [
                   {
-                    label: "# of Confirmed Cases in " + country,
+                    label: '# of Confirmed Cases in ' + country,
                     data: cases,
                     // backgroundColor: [
                     //   "rgba(255, 99, 132, 0.2)",
@@ -130,45 +130,11 @@ function getGrafico(cronologiaLink, ctx) {
             // )
             // const stream = canvasRenderService.renderToStream(configuration)
 
-            // console.log("data plotted " + dataUrl)
-
-            // This piece of code down here uses the GROWTH function from Excell, right, that Excell,
-            // to simulate the growth of a certain function. It does work pretty well but
-            // I still dont feel like I should tell how the disease might evolve and spread, you know.
-            // Gonna leave it commented out.
-
-            /*
-              // starts here
-              let estimatedDays = 10
-              let dummmyX = [...Array(days.length + estimatedDays).keys()]
-              console.log(days.length)
-              console.log(dummmyX)
-  
-              let estimatedGrowth = growth(cases, undefined, dummmyX)
-              let estimatedFutureValues = []
-              estimatedGrowth.forEach(element => {
-                if (element > cases[days.length - 1]) {
-                  estimatedFutureValues.push(element)
-                }
-              })
-  
-              for (let index = 0; index < estimatedFutureValues.length; index++) {
-                estimatedFutureValues[index] = Math.floor(
-                  estimatedFutureValues[index]
-                )
-              }
-              console.log("estimated future growth: " + estimatedFutureValues)
-              // ends here. "estimatedFutureValues" is an array containing new possible values, greater than the latest real one.
-              */
-
             ctx.replyWithMediaGroup([
               {
                 media: { source: graphImage },
-                // caption:
-                //   "Possibile crescita del numero di contagiati nei prossimi 7 giorni: " +
-                //   estimatedFutureValues,
                 caption: days[days.length - 1],
-                type: "photo",
+                type: 'photo',
               },
             ])
           })()
@@ -182,15 +148,15 @@ function getGrafico(cronologiaLink, ctx) {
 
 function growth(known_y, known_x, new_x, use_const) {
   // default values for optional parameters:
-  if (typeof known_x == "undefined") {
+  if (typeof known_x == 'undefined') {
     known_x = []
     for (var i = 1; i <= known_y.length; i++) known_x.push(i)
   }
-  if (typeof new_x == "undefined") {
+  if (typeof new_x == 'undefined') {
     new_x = []
     for (var i = 1; i <= known_y.length; i++) new_x.push(i)
   }
-  if (typeof use_const == "undefined") use_const = true
+  if (typeof use_const == 'undefined') use_const = true
 
   // calculate sums over the data:
   var n = known_y.length
