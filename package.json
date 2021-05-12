@@ -20,7 +20,7 @@
   "homepage": "https://github.com/D35P4C1T0/coronastatusitbot#readme",
   "dependencies": {
     "axios": "^0.21.1",
-    "chart.js": "^2.9.3",
+    "chart.js": "^2.9.4",
     "chartjs-node-canvas": "^3.0.6",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
